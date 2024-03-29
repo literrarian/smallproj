@@ -5,8 +5,11 @@ class MeetingController{
 
     async create(req,res,next){
         try {
-            let {name, description, game_id, age_restriction, slots_num, m_date,user_id} = req.body
-            const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date,user_id})
+            let {name, description, game_id, age_restriction, slots_num, m_date,userId} = req.body
+            const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date})
+            let meetingId = meeting.id
+            const shoveInJointTable = await MeetingPlayer.create({userId,meetingId})
+            console.log(shoveInJointTable)
             return res.json(meeting)
         }
         catch (e) {
@@ -101,7 +104,9 @@ class MeetingController{
             const numDeleted = await Meeting.destroy({
                 where: { id: id }
             });
-
+            await MeetingPlayer.destroy({
+                where:{meetingId:id}
+            })
             if (numDeleted === 0) {
                 throw new Error('Встреча не найдена');
             }

@@ -3,8 +3,8 @@ const ApiError = require('../error/ApiError')
 class GenreController{
 
     async create(req,res){
-        const {name} = req.body
-        const genre = await Genre.create({name})
+        const {name,description} = req.body
+        const genre = await Genre.create({name,description})
         return res.json(genre)
     }
     async getAll(req,res){
