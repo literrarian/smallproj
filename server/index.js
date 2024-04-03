@@ -12,7 +12,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 app.use('/api', router)
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 
 //обработка ошибок
 app.use(errorHandler)
