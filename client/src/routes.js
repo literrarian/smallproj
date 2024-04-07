@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import {LOGIN_ROUTE} from "./utils/consts"
 import {REGISTRATION_ROUTE} from "./utils/consts"
 import GamePage from "./pages/GamePage";
+
 import {GAME_ROUTE} from "./utils/consts"
 import MeetingPage from "./pages/MeetingPage";
 import {MEETING_ROUTE} from "./utils/consts"
