@@ -3,12 +3,17 @@ const {Genre} = require('../models/models')
 const {GameGenre} = require('../models/models')
 const ApiError = require('../error/ApiError')
 const {Op} = require("sequelize");
+const uuid = require('uuid')
+const path = require('path')
 class GameController{
 
     async create(req,res,next){
         try {
             let {name, age_restriction, players_num, genre_id, detail} = req.body
-            const game = await Game.create({name, age_restriction, players_num})
+            const {img} = req.files
+            let fileName =uuid.v4() + ".jpg"
+            img.mv(path.resolve(__dirname,'..','static',fileName))
+            const game = await Game.create({name, age_restriction, players_num, img: filename})
             
             let gameId=game.id
             for (let genreId of genre_id){

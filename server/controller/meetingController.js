@@ -1,15 +1,20 @@
 ﻿const {Meeting, MeetingPlayer} = require('../models/models')
 const ApiError = require('../error/ApiError')
 const {Op} = require("sequelize");
+const uuid = require('uuid')
+const path = require('path')
 class MeetingController{
 
     async create(req,res,next){
         try {
             let {name, description, game_id, age_restriction, slots_num, m_date,userId} = req.body
-            const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date})
+            const {img} = req.files
+            let fileName =uuid.v4() + ".jpg"
+            img.mv(path.resolve(__dirname,'..','static',fileName))
+            const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date,img: filename})
             let meetingId = meeting.id
             const shoveInJointTable = await MeetingPlayer.create({userId,meetingId})
-            console.log(shoveInJointTable)
+          //  console.log(shoveInJointTable)
             return res.json(meeting)
         }
         catch (e) {
@@ -88,6 +93,7 @@ class MeetingController{
                 age_restriction:meeting.age_restriction, 
                 slots_num:meeting.slots_num, 
                 m_date: meeting.m_date
+                img: meeting.img
             }) 
             res.status(200).json({message: "Данные обновлены"})
             await oldMeeting.save();

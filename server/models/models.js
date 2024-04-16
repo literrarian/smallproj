@@ -22,18 +22,21 @@ const Meeting = sequelize.define('meeting',{
     age_restriction: {type:DataTypes.STRING},
     slots_num:{type: DataTypes.INTEGER, allowNull:false},
     m_date: {type: DataTypes.DATE, allowNull:false},
-})
+    img:{type:DataTypes.STRING},}
+    {timestamps: false})
 
 const Game = sequelize.define('game',{
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     name: {type: DataTypes.STRING, unique: true, allowNull:false},
     age_restriction: {type:DataTypes.STRING},
-    players_num:{type: DataTypes.STRING},},
+    players_num:{type: DataTypes.STRING},
+    img:{type:DataTypes.STRING},},
     {timestamps: false} )
 const GameDetail = sequelize.define('game_detail',{
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     title: {type: DataTypes.STRING, allowNull:false},
-    description: {type:DataTypes.STRING,allowNull:false},},
+    description: {type:DataTypes.STRING,allowNull:false},
+    img:{type:DataTypes.STRING},},
     {timestamps: false} )
 
 const Genre = sequelize.define('genre',{
