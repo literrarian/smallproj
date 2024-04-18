@@ -17,9 +17,9 @@ const CreateGame =observer( ({show,onHide}) => {
     const [gGenre, setGGenre] = useState('');
     const [fileName, setFileName] = useState(null);
 
-    useEffect(()=>{
-        fetchGenres().then(data => genre.setGenres(data))
-    },[])
+    // useEffect(()=>{
+    //     fetchGenres().then(data => genre.setGenres(data))
+    // },[])
     const selectFile = e =>{
         setFileName(e.target.files[0])
     }

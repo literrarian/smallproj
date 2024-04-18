@@ -72,6 +72,9 @@ class GameController{
     async update(req,res,next){
         try{
             const game = req.body
+            const {img} = req.files
+            let fileName =uuid.v4() + ".jpg"
+            img.mv(path.resolve(__dirname,'..','static',fileName))
             const {id} = req.params
             if (!id){
                 next(ApiError.badRequest('Такой игры не существует'))
@@ -84,7 +87,7 @@ class GameController{
                 name: game.name,
                 age_restriction:game.age_restriction,
                 players_num:game.players_num,
-                img: game.img
+                img: fileName
             })
             const oldDetail = await  GameDetail.findOne(
                 {
@@ -98,19 +101,18 @@ class GameController{
                         title: i.title,
                         descent: i.description,
                     }))
+                GameDetail.save()
             }
             let gameId=id
             let genre_id=game.genre_id
-            for (let genreId of genre_id){
-                await GameGenre.update({
-                    genreId: genreId,
-                    gameId: gameId
+                await GameGenre.update(
+                    {genreId: genre_id},
+                    {where:{gameId: gameId,}
                 })
-            }
             
             
             res.status(200).json({message: "Данные обновлены"})
-            await oldMeeting.save();
+            await oldGame.save();
 
         }
         catch (e) {

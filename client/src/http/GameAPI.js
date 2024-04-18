@@ -13,8 +13,8 @@ export const fetchOneGame = async (id) =>{
     return data
 
 }
-export const updateGame = async (id) =>{
-    const {data} = await $authHost.put('api/game/'+id)
+export const updateGame = async (id,game) =>{
+    const {data} = await $authHost.put('api/game/'+id,game)
     return data
 
 }

@@ -1,13 +1,17 @@
-﻿import React, {useContext, useState} from 'react';
+﻿import React, {useContext, useEffect, useState} from 'react';
 import Modal from "react-bootstrap/Modal";
 import {Dropdown, Form, Row, Button, Col} from "react-bootstrap";
 import {Context} from '../../index';
 import {fetchOneGame} from '../../http/GameAPI';
 import Select from "react-select";
 import {forEach} from "react-bootstrap/ElementChildren";
-const UpdateGame = ({ show, onHide }) => {
+import {observer} from "mobx-react-lite";
+import {updateGame} from '../../http/GameAPI'
+
+const UpdateGame = observer( ({show,onHide}) => {
     const {genre} = useContext(Context);
     const {game} = useContext(Context);
+    const [games,setGames] = useState()
     const [selectedGame, setSelectedGame] = useState({});
     const [name, setName] = useState('');
     const [ageLimit, setAgeLimit] = useState('');
@@ -15,6 +19,10 @@ const UpdateGame = ({ show, onHide }) => {
     const [gGenre, setGGenre] = useState('');
     const [details, setDetails] = useState([]);
     const [fileName, setFileName] = useState(null);
+    const selectFile = e =>{
+        setFileName(e.target.files[0])
+    }
+    
     const loadData = async (gameId) => {
         try {
             const gameData = await fetchOneGame(gameId); 
@@ -24,9 +32,6 @@ const UpdateGame = ({ show, onHide }) => {
              setGGenre(gameData.genre);
              setFileName(gameData.img)
              setGGenre(gameData.genres)
-            console.log(gameData)
-            
-            
         } catch (error) {
             console.error('Ощибк:', error);
         }
@@ -36,11 +41,12 @@ const UpdateGame = ({ show, onHide }) => {
         formData.append('name',name)
         formData.append('age_rescrtiction',ageLimit)
         formData.append('players_num',playerCount)
-        formData.append('gGenre',playerCount)
+        formData.append('genre_id',game.selectedGameGenre.id)
         formData.append('img',fileName)
-        console.log(formData)
         
-        }
+        updateGame(game.selectedGame,formData).then(data=>onHide())
+        
+    }
     
 
     const addDetail = () => {
@@ -100,25 +106,19 @@ const UpdateGame = ({ show, onHide }) => {
                         placeholder = {"Количество игроков..."}
                     />
                     <Form.Control
-                        
                         className={"mt-2"}
                         type={"file"}
                         placeholder = {"Картинка..."}
+                        onChange={selectFile}
                     />
-                    <Select className={"mt-2"}
-                        placeholder={"Жанр..."}
-                        value={gGenre? { value: gGenre[0].id, label: gGenre[0].name }:{value:undefined, label:undefined}}
-                        
-                        closeMenuOnSelect={true}
-                        hideSelectedOptions={false}
-                        options={genre.genres.map((gen) => ({
-                            value: gen.id,
-                            label: gen.name,
-                        }))}
-                        onChange={(value)=> genre.setSelectedGenre(value.value)} //передаем id
-                        controlShouldRenderValue={true}
-                        isOptionDisabled={(option) => option.isdisabled}
-                    />
+                    <Dropdown className={"mt-2"}>
+                        <Dropdown.Toggle> {game.selectedGameGenre.name||"Жанр"}</Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {genre.genres.map(genre=>
+                                <Dropdown.Item key={genre.id} onClick={()=>game.setSelectedGameGenre(genre)}>{genre.name}</Dropdown.Item>
+                            )}
+                        </Dropdown.Menu>
+                    </Dropdown>
                     <Button variant={"outline-dark"} className={"mt-2"} onClick={addDetail}>Добавить новую характеристику</Button>
                     {
                         details.map(i=>
@@ -148,6 +148,6 @@ const UpdateGame = ({ show, onHide }) => {
             </Modal.Footer>
         </Modal>
     );
-}
+})
 
 export default UpdateGame;
