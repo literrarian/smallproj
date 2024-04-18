@@ -1,17 +1,22 @@
-﻿import React, {useContext} from 'react';
+﻿import React, {useContext, useEffect, useState} from 'react';
 import {Button, Col, Container, Image, Row} from "react-bootstrap";
 import {Context} from '../index'
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {LOGIN_ROUTE} from '../utils/consts'
+import {fetchOneMeeting} from '../http/MeetingAPI'
 const MeetingPage = () => {
-    const meeting = {id:1, name:'Встреча1',description:'Описание1',age_restriction:'4+',slots_num:'3',m_date:'09.04.2024',game_id:'1',img:'https://sun9-26.userapi.com/impg/CNG4p4CEej-3HGXzBKT-IWvBWzuMlfLqnUF-nA/_P7DoQnKY24.jpg?size=1440x1440&quality=95&sign=2b28705f44ab68dfb80d259abeb2b7d2&type=album'}
+    const [meeting,setMeeting] = useState({})
+    const {id} = useParams()
+    useEffect(()=>{
+        fetchOneMeeting(id).then(data => setMeeting(data)) //при создании встречи сразу пушить создателя в player_meeting
+    },[])
     const {user} = useContext(Context)
     const navigate = useNavigate();
     return (
         <Container className={"mt-4"}>
            <Row>
             <Col md={4}>
-                <Image width={400} height={400} src={meeting.img}/>
+                <Image width={400} height={400} src={process.env.REACT_APP_API_URL+meeting.img}/>
             </Col>
                 <Col md={4} className={"d-flex flex-column align-items-center"}>
                     <Row>

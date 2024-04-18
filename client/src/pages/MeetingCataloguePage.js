@@ -1,10 +1,17 @@
-﻿import React, {useState} from 'react';
+﻿import React, {useContext, useEffect, useState} from 'react';
 import {Col, Container, Dropdown, Row} from "react-bootstrap";
 import Select from "react-select"
 import FilterPanelMeetings from "../components/FilterPanelMeetings"
 import MeetingsList from "../components/MeetingsList"
-const MeetingCataloguePage = () => {
+import {observer} from "mobx-react-lite";
+import {Context} from '../index'
+import {fetchMeetings} from '../http/MeetingAPI'
 
+const MeetingCataloguePage = observer(()=>{
+    const {meeting} = useContext(Context)
+    useEffect(()=>{
+        fetchMeetings().then(data => meeting.setMeetings(data.rows))
+    },[])
     return (
         <Container fluid>
             <Row className={"mt-5"}>
@@ -15,6 +22,6 @@ const MeetingCataloguePage = () => {
             </Row>
         </Container>
     );
-};
+});
 
 export default MeetingCataloguePage;

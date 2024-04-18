@@ -13,7 +13,7 @@ class GameController{
             const {img} = req.files
             let fileName =uuid.v4() + ".jpg"
             img.mv(path.resolve(__dirname,'..','static',fileName))
-            const game = await Game.create({name, age_restriction, players_num, img: filename})
+            const game = await Game.create({name, age_restriction, players_num, img: fileName})
             
             let gameId=game.id
             for (let genreId of genre_id){
@@ -23,11 +23,12 @@ class GameController{
             if (detail){
                 detail = JSON.parse(detail) //на фронт передадим эту штуку строкой, на беке она жаба объект
                 detail.forEach(i=>
-                    GameDetail.create({
-                        title: i.title,
-                        descent: i.description,
-                        gameId: game.id
-                    }))
+                   GameDetail.create({
+                       title: i.title,
+                       description: i.description,
+                       gameId: game.id
+                   }))
+                
             }
             return res.json(game)
         }
@@ -67,6 +68,77 @@ class GameController{
             }
         )
         return res.json(game)
+    }
+    async update(req,res,next){
+        try{
+            const game = req.body
+            const {id} = req.params
+            if (!id){
+                next(ApiError.badRequest('Такой игры не существует'))
+            }
+            const oldGame = await Game.findByPk(id)
+            if (!oldGame){
+                throw new Error('Такой игры не существует')
+            }
+            await oldGame.update({
+                name: game.name,
+                age_restriction:game.age_restriction,
+                players_num:game.players_num,
+                img: game.img
+            })
+            const oldDetail = await  GameDetail.findOne(
+                {
+                    where: {gameId: id}
+                }
+            )
+            if (oldDetail){
+                oldDetail = JSON.parse(oldDetail) //на фронт передадим эту штуку строкой, на беке она жаба объект
+                oldDetail.forEach(i=>
+                    GameDetail.update({
+                        title: i.title,
+                        descent: i.description,
+                    }))
+            }
+            let gameId=id
+            let genre_id=game.genre_id
+            for (let genreId of genre_id){
+                await GameGenre.update({
+                    genreId: genreId,
+                    gameId: gameId
+                })
+            }
+            
+            
+            res.status(200).json({message: "Данные обновлены"})
+            await oldMeeting.save();
+
+        }
+        catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+
+    }
+    async remove(req,res,next){
+        try {
+            const { id } = req.params;
+            const numDeleted = await Game.destroy({
+                where: { id: id }
+            });
+            await GameDetail.destroy({
+                where:{gameId:id}
+            })
+            await GameGenre.destroy({
+                where:{gameId:id}
+            })
+            if (numDeleted === 0) {
+                throw new Error('Игра не найдена');
+            }
+
+            res.status(200).json({ message: 'Игра успешно удалена' });
+        } catch (e) {
+            next(ApiError.badRequest(e.message));
+        }
+
     }
 }
 

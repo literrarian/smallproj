@@ -69,7 +69,7 @@ class MeetingController{
                 where: {id},
                 include: [
                     {model:MeetingPlayer}
-                ]
+                ] 
             }
         )
         return res.json(meeting)
@@ -81,7 +81,6 @@ class MeetingController{
             if (!id){
                 next(ApiError.badRequest('Такой встречи не существует'))
             }
-            console.log(id)
             const oldMeeting = await Meeting.findByPk(id)
             if (!oldMeeting){
                 throw new Error('Такой встречи не сущеествует')
@@ -92,7 +91,7 @@ class MeetingController{
                 game_id: meeting.game_id,
                 age_restriction:meeting.age_restriction, 
                 slots_num:meeting.slots_num, 
-                m_date: meeting.m_date
+                m_date: meeting.m_date,
                 img: meeting.img
             }) 
             res.status(200).json({message: "Данные обновлены"})

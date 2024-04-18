@@ -1,12 +1,39 @@
-﻿import React,{useState} from 'react';
+﻿import React, {useContext, useState} from 'react';
 import {Button, Card, Container, Form} from "react-bootstrap";
-import {REGISTRATION_ROUTE, LOGIN_ROUTE} from '../utils/consts'
-import {NavLink, useLocation} from "react-router-dom"
-const Auth = () => {
-   const location = useLocation()
+import {REGISTRATION_ROUTE, LOGIN_ROUTE,GAME_CAT_ROUTE} from '../utils/consts'
+import {NavLink, useLocation, useNavigate} from "react-router-dom"
+import {registration,login} from '../http/UserAPI'
+import {observer} from "mobx-react-lite";
+import {Context} from "../index"
+
+const Auth = observer(() => {
+    const {user} = useContext(Context)
+    const location = useLocation()
+    const navigate = useNavigate()
     const isLogin = location.pathname === LOGIN_ROUTE
-    
     const [inputType, setInputType] = useState("text");
+    const [email,setEmail] = useState('')
+    const [password,setPassword] = useState('')
+    const [nickname,setNickname] = useState('')
+    const [age,setAge] = useState('')
+   const click = async ()=>{
+       try{
+           let data;
+           if(isLogin) {
+               data = await login(email,password)
+           }
+           else
+           {
+               data = await registration(email,password,nickname,age)
+           }
+           user.setUser(user)
+           user.setIsAuth(true) 
+           navigate(GAME_CAT_ROUTE)
+       } catch (e) {
+           alert(e.response.data.message)
+       }
+       
+   }
     return (
         <Container className={"d-flex justify-content-center align-items-center"}
         style={{height: window.innerHeight-54}}
@@ -18,11 +45,16 @@ const Auth = () => {
                        <div>
                         <Form.Control
                         className={"mt-2"}
-                            placeholder="Введите email..."
+                        placeholder="Введите email..."
+                        value={email}
+                        onChange={e=> setEmail(e.target.value)}
                         />
                         <Form.Control
                            className={"mt-2"}
                            placeholder="Введите пароль..."
+                           type={"password"}
+                           value={password}
+                           onChange={e=> setPassword(e.target.value)}
                         />
                        </div>
                        :
@@ -30,14 +62,21 @@ const Auth = () => {
                        <Form.Control
                        className={"mt-2"}
                        placeholder="Введите email..."
+                       value={email}
+                       onChange={e=> setEmail(e.target.value)}
                        />
                        <Form.Control
                            className={"mt-2"}
                            placeholder="Введите пароль..."
+                           type={"password"}
+                           value={password}
+                           onChange={e=> setPassword(e.target.value)}
                        />
                        <Form.Control
                            className={"mt-2"}
                            placeholder="Введите имя..."
+                           value={nickname}
+                           onChange={e=> setNickname(e.target.value)}
                        />
                        <Form.Control
                            className={"mt-2"}
@@ -45,6 +84,9 @@ const Auth = () => {
                            placeholder="Введите дату рождения..." //Костылина с стекоферфлоу - без нее не показывает плейсхолдер
                            onFocus={() => setInputType("date")}
                            onBlur={() => setInputType("text")}
+
+                           value={age}
+                           onChange={e=> setAge(e.target.value)}
                            
                        />
                        </div>
@@ -55,7 +97,7 @@ const Auth = () => {
                            : 
                            <NavLink to={LOGIN_ROUTE}> Войти?</NavLink>  
                        }   
-                       <Button  variant={"outline-primary"}>
+                       <Button  variant={"outline-primary"} onClick={click}>
                            {isLogin ? 'Войти' :'Регистрация'}
                            
                        </Button>  
@@ -66,6 +108,6 @@ const Auth = () => {
             
         </Container>
     );
-};
+});
 
 export default Auth;

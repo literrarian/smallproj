@@ -2,12 +2,11 @@
 
 export default class GameStore{
     constructor() {
-        this._games = [
-            {id:1, name:'Игра1',age_restriction:'5+',players_num:'2', img:'https://steamuserimages-a.akamaihd.net/ugc/5088536233466642530/35D9F1EF85BA81DFB7F091E2AFF156F9C703CDC6/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false'},
-            {id:2, name:'Игра2',age_restriction:'2+',players_num:'2-4', img:'https://steamuserimages-a.akamaihd.net/ugc/5088536233466642530/35D9F1EF85BA81DFB7F091E2AFF156F9C703CDC6/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false'}
-        ]
+        this._games = []
         this._selectedAge = {}
         this._selectedPlayersNum = {}
+        this._selectedGame = {}
+        this._selectedGameGenre={}
         makeAutoObservable(this) //при изменении переменных перерендерим компоненты
     }
     setGames(games){
@@ -15,6 +14,12 @@ export default class GameStore{
     }
     get games(){
         return this._games
+    }
+    setSelectedGameGenre(genre){
+        this._selectedGameGenre = genre
+    }
+    setSelectedGame(game){
+        this._selectedGame = game //может тут нужен массив
     }
     setSelectedAge(selectedAge){
         this._selectedAge = selectedAge //может тут нужен массив
@@ -27,5 +32,11 @@ export default class GameStore{
     }
     get selectedPlayersNum(){
         return  this._selectedPlayersNum //может тут нужен массив
+    }
+    get selectedGame(){
+        return  this._selectedGame //может тут нужен массив
+    }
+    get selectedGameGenre(){
+        return  this._selectedGameGenre //может тут нужен массив
     }
 }

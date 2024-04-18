@@ -13,6 +13,14 @@ const FilterPanelMeeting = observer(() => {
     const {user} = useContext(Context)
     const navigate = useNavigate()
     const [meetingVisible,setMeetingVisible] = useState(false)
+
+    const removeDuplicates = (array, property) => {
+        return array.filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t[property] === item[property]
+                ))
+        );
+    };
         return (
             <Col md={2}>
                 <h6>Возраст</h6>
@@ -21,7 +29,7 @@ const FilterPanelMeeting = observer(() => {
                     //   isMulti={true}
                     closeMenuOnSelect={true}
                     hideSelectedOptions={false}
-                    options={meeting.meetings.map((gen) => ({
+                    options={removeDuplicates(meeting.meetings, 'age_restriction').map((gen) => ({
                         value: gen.id,
                         label: gen.age_restriction,
                     }))}
@@ -36,9 +44,10 @@ const FilterPanelMeeting = observer(() => {
                     //   isMulti={true}
                     closeMenuOnSelect={true}
                     hideSelectedOptions={false}
-                    options={meeting.meetings.map((gam) => ({
-                        value: gam.id,
-                        label: gam.slots_num,
+
+                    options={removeDuplicates(meeting.meetings, 'slots_num').map((gen) => ({
+                        value: gen.id,
+                        label: gen.slots_num,
                     }))}
                     onChange={(value)=> meeting.setSelectedPlayersNum(value.label)} //не айди
                     controlShouldRenderValue={true}

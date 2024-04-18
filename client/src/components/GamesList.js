@@ -23,10 +23,11 @@ const GamesList = observer(() => {
             </thead>
             <tbody>
             {game.games.map((gameItem, index) => (
+                
                 <tr key={index} onClick={() => navigate(GAME_ROUTE + '/' + gameItem.id)}>
                     <td>{gameItem.name}</td>
-                    <td> <Image width={80} height={80} src = {gameItem.img}/></td>
-                    <td>{gameItem.genre}</td>
+                    <td> <Image width={80} height={80} src = {process.env.REACT_APP_API_URL+ gameItem.img}/></td>
+                    <td>{gameItem.genres[0].name}</td>
                     <td>{gameItem.age_restriction}</td>
                     <td>{gameItem.players_num}</td>
                 </tr>

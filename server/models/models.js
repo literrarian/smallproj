@@ -22,8 +22,8 @@ const Meeting = sequelize.define('meeting',{
     age_restriction: {type:DataTypes.STRING},
     slots_num:{type: DataTypes.INTEGER, allowNull:false},
     m_date: {type: DataTypes.DATE, allowNull:false},
-    img:{type:DataTypes.STRING},}
-    {timestamps: false})
+    img:{type:DataTypes.STRING},})
+    {timestamps: false}
 
 const Game = sequelize.define('game',{
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -65,6 +65,8 @@ Game.belongsToMany(Genre, {through: GameGenre})
 
 User.belongsToMany(Meeting, {through: MeetingPlayer})
 Meeting.belongsToMany(User, {through: MeetingPlayer})
+
+
 
 module.exports = {
     User,

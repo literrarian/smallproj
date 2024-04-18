@@ -1,6 +1,6 @@
 ﻿import Select from "react-select";
 import {Button, Col} from "react-bootstrap";
-import React, {useContext} from "react";
+import React, {useContext, useMemo, useState} from "react";
 import {Context} from '../index'
 import {observer} from "mobx-react-lite"
 
@@ -8,7 +8,14 @@ import {observer} from "mobx-react-lite"
 const FilterPanel = observer(() => {
     const {genre} = useContext(Context)
     const {game} = useContext(Context)
-    
+
+        const removeDuplicates = (array, property) => {
+            return array.filter((item, index, self) =>
+                    index === self.findIndex((t) => (
+                        t[property] === item[property]
+                    ))
+            );
+        };
     return (
         <Col md={2}>
             <h6>Жанры</h6>
@@ -32,7 +39,7 @@ const FilterPanel = observer(() => {
              //   isMulti={true}
                 closeMenuOnSelect={true}
                 hideSelectedOptions={false}
-                options={game.games.map((gam) => ({
+                options={removeDuplicates(game.games, 'players_num').map((gam) => ({
                     value: gam.id,
                     label: gam.players_num,
                 }))}
@@ -46,10 +53,11 @@ const FilterPanel = observer(() => {
             //    isMulti={true}
                 closeMenuOnSelect={true}
                 hideSelectedOptions={false}
-                options={game.games.map((gam) => ({
+                options={removeDuplicates(game.games, 'age_restriction').map((gam) => ({
                     value: gam.id,
                     label: gam.age_restriction,
                 }))}
+                
                 onChange={(value)=> game.setSelectedAge(value.label)}
                 controlShouldRenderValue={true}
                 isOptionDisabled={(option) => option.isdisabled}

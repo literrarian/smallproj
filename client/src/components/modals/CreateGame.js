@@ -1,19 +1,49 @@
-﻿import React, {Component, useContext, useState} from 'react';
+﻿import React, {Component, useContext, useEffect, useState} from 'react';
 import Modal from "react-bootstrap/Modal";
 import {Dropdown, Form, Row} from "react-bootstrap";
 import {Button,Col} from "react-bootstrap";
-
+import {fetchGenres} from '../../http/GenreAPI'
+import {createGame} from '../../http/GameAPI'
 import {Context} from '../../index'
+import {observer} from "mobx-react-lite";
 
-const CreateGame = ({show,onHide}) => {
+const CreateGame =observer( ({show,onHide}) => {
     const {genre} = useContext(Context)
+    const {game} = useContext(Context)
     const [detail,setDetail] = useState([])
+    const [name, setName] = useState('');
+    const [ageLimit, setAgeLimit] = useState('');
+    const [playerCount, setPlayerCount] = useState('');
+    const [gGenre, setGGenre] = useState('');
+    const [fileName, setFileName] = useState(null);
+
+    useEffect(()=>{
+        fetchGenres().then(data => genre.setGenres(data))
+    },[])
+    const selectFile = e =>{
+        setFileName(e.target.files[0])
+    }
     const addDetail = () =>{
         setDetail([...detail,{title:'',description: '', number:Date.now()}])
     }
     const removeDetail = (number) =>{
         setDetail(detail.filter(i => i.number !== number))
     }
+    const changeDetail = (key,value,number)=>{
+        setDetail(detail.map(i=> i.number===number?{...i, [key]:value}:i))
+    }
+    const addGame = ()=>{
+       const formData = new FormData()
+        formData.append('name',name)
+        formData.append('age_restriction',ageLimit)
+        formData.append('players_num',playerCount)
+        formData.append('genre_id',game.selectedGameGenre.id)
+        formData.append('img',fileName)
+        formData.append('detail',JSON.stringify(detail))
+        
+        createGame(formData).then(data=>onHide()) 
+    }
+    
     return (
         <Modal
             show={show}
@@ -28,13 +58,19 @@ const CreateGame = ({show,onHide}) => {
             <Modal.Body>
                 <Form>
                     <Form.Control
+                        value={name}
+                        onChange={e=>setName(e.target.value)}
                         placeholder = {"Название игры..."}
                     />
                     <Form.Control
+                        value={ageLimit}
+                        onChange={e=>setAgeLimit(e.target.value)}
                         className={"mt-2"}
                         placeholder = {"Возрастное ограничение..."}
                     />
                     <Form.Control
+                        value={playerCount}
+                        onChange={e=>setPlayerCount(e.target.value)}
                         className={"mt-2"}
                         placeholder = {"Количество игроков..."}
                     />
@@ -42,12 +78,13 @@ const CreateGame = ({show,onHide}) => {
                         className={"mt-2"}
                         type={"file"}
                         placeholder = {"Картинка..."}
+                        onChange={selectFile}
                     />
                     <Dropdown className={"mt-2"}>
-                      <Dropdown.Toggle> Жанр</Dropdown.Toggle>  
+                      <Dropdown.Toggle> {game.selectedGameGenre.name||"Жанр"}</Dropdown.Toggle>  
                         <Dropdown.Menu>
                             {genre.genres.map(genre=>
-                            <Dropdown.Item key={genre.id}>{genre.name}</Dropdown.Item>
+                            <Dropdown.Item key={genre.id} onClick={()=>game.setSelectedGameGenre(genre)}>{genre.name}</Dropdown.Item>
                             )}
                         </Dropdown.Menu>
                     </Dropdown>
@@ -57,12 +94,16 @@ const CreateGame = ({show,onHide}) => {
                         <Row className={"mt-2"} key={i.number}>
                            <Col md={4}>
                                <Form.Control
-                                   placeholder={"Название характиристики"} 
+                                   value={i.title}
+                                   placeholder={"Название характиристики"}
+                                   onChange={(e)=>changeDetail('title',e.target.value, i.number)}
                                />
                            </Col>
                             <Col md={4}>
                                 <Form.Control
-                                placeholder={"Описание характеристики"}>
+                                    value={i.description}
+                                    onChange={(e)=>changeDetail('description',e.target.value, i.number)}
+                                    placeholder={"Описание характеристики"}>
 
                                 </Form.Control>
                             </Col>
@@ -76,10 +117,10 @@ const CreateGame = ({show,onHide}) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant={"dark"} onClick={onHide}>Закрыть</Button>
-                <Button variant={"dark"} onClick={onHide}>Добавить</Button>
+                <Button variant={"dark"} onClick={addGame}>Добавить</Button>
             </Modal.Footer>
         </Modal>
     );
-}
+})
 
 export default CreateGame;

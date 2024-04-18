@@ -1,4 +1,4 @@
-﻿import React, {useContext} from 'react';
+﻿import React, {useContext, useState} from 'react';
 import {observer} from "mobx-react-lite";
 import {Context} from "../index";
 import {Row, Table} from "react-bootstrap";
@@ -7,6 +7,7 @@ import {GENRE_ROUTE} from  '../utils/consts'
 
 const GenreList = observer(() => {
     const {genre} = useContext(Context)
+    
     return (
 
         <Table striped bordered hover>
@@ -17,8 +18,8 @@ const GenreList = observer(() => {
             </tr>
             </thead>
             <tbody>
-            {genre.genres.map((genreItem, index) => (
-                <tr key={index} >
+            {genre.genres.map((genreItem, id) => (
+                <tr key={id} >
                     <td>{genreItem.name}</td>
                     <td>{genreItem.description}</td>
                 </tr>
