@@ -20,6 +20,17 @@ const CreateGame =observer( ({show,onHide}) => {
     // useEffect(()=>{
     //     fetchGenres().then(data => genre.setGenres(data))
     // },[])
+    const resetForm = () =>{
+        setName('');
+        setAgeLimit('');
+        setPlayerCount('');
+        setFileName('')
+        game.setSelectedGameGenre('')
+    }
+    const handleClose = () => {
+        resetForm();
+        onHide();
+    }
     const selectFile = e =>{
         setFileName(e.target.files[0])
     }
@@ -41,13 +52,13 @@ const CreateGame =observer( ({show,onHide}) => {
         formData.append('img',fileName)
         formData.append('detail',JSON.stringify(detail))
         
-        createGame(formData).then(data=>onHide()) 
+        createGame(formData).then(data=>handleClose()) 
     }
     
     return (
         <Modal
             show={show}
-            onHide={onHide}
+            onHide={handleClose}
             centered
         >
             <Modal.Header closeButton>
@@ -116,7 +127,7 @@ const CreateGame =observer( ({show,onHide}) => {
                 
             </Modal.Body>
             <Modal.Footer>
-                <Button variant={"dark"} onClick={onHide}>Закрыть</Button>
+                <Button variant={"dark"} onClick={handleClose}>Закрыть</Button>
                 <Button variant={"dark"} onClick={addGame}>Добавить</Button>
             </Modal.Footer>
         </Modal>

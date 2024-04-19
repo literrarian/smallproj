@@ -4,51 +4,73 @@ import {Dropdown, Form, Row, Button, Col} from "react-bootstrap";
 import {Context} from '../../index';
 import {fetchOneGame} from '../../http/GameAPI';
 import Select from "react-select";
-import {forEach} from "react-bootstrap/ElementChildren";
 import {observer} from "mobx-react-lite";
 import {updateGame} from '../../http/GameAPI'
 
 const UpdateGame = observer( ({show,onHide}) => {
     const {genre} = useContext(Context);
     const {game} = useContext(Context);
-    const [games,setGames] = useState()
-    const [selectedGame, setSelectedGame] = useState({});
+    const [selectedGame, setSelectedGame] = useState(0);
+    const [selectedGenre, setSelectedGenre] = useState({});
     const [name, setName] = useState('');
     const [ageLimit, setAgeLimit] = useState('');
     const [playerCount, setPlayerCount] = useState('');
-    const [gGenre, setGGenre] = useState('');
     const [details, setDetails] = useState([]);
     const [fileName, setFileName] = useState(null);
-    const selectFile = e =>{
-        setFileName(e.target.files[0])
-    }
-    
     const loadData = async (gameId) => {
         try {
-            const gameData = await fetchOneGame(gameId); 
-             setName(gameData.name);
-             setAgeLimit(gameData.age_restriction);
-             setPlayerCount(gameData.players_num);
-             setGGenre(gameData.genre);
-             setFileName(gameData.img)
-             setGGenre(gameData.genres)
+            const gameData = await fetchOneGame(gameId);
+            setName(gameData.name);
+            setAgeLimit(gameData.age_restriction);
+            setPlayerCount(gameData.players_num);
+            setFileName(gameData.img)
+            setDetails(gameData.detail)
+            setSelectedGenre(gameData.genres[0])
+
         } catch (error) {
             console.error('Ощибк:', error);
         }
     }
-    const updateData = async () =>{
-        const formData = new FormData()
-        formData.append('name',name)
-        formData.append('age_rescrtiction',ageLimit)
-        formData.append('players_num',playerCount)
-        formData.append('genre_id',game.selectedGameGenre.id)
-        formData.append('img',fileName)
+    useEffect(() => {
         
-        updateGame(game.selectedGame,formData).then(data=>onHide())
-        
+        if (selectedGame!==0) {
+            loadData(selectedGame);
+        }
+    }, [selectedGame]);
+
+    const selectFile = e =>{
+        setFileName(e.target.files[0])
     }
     
+    
+     const resetForm = () =>{
+         setName('');
+         setAgeLimit('');
+         setPlayerCount('');
+         setFileName('')
+         setSelectedGame(0)
+         setSelectedGenre({})
+     }
+     const handleClose = () => {
+        resetForm();
+         onHide();
+     }
+    const updateData = async () =>{
+       try{
+           const formData = new FormData()
+           formData.append('name',name)
+           formData.append('age_restriction',ageLimit)
+           formData.append('players_num',playerCount)
+           formData.append('genre_id',selectedGenre.id)
+           formData.append('img',fileName)
+           formData.append('detail',JSON.stringify(details))
+           updateGame(selectedGame,formData).then(data=>handleClose()) 
+       } catch (e) {
+           alert(e)
+       }
+    }
 
+   
     const addDetail = () => {
         setDetails([...details, { title: '', description: '', number: Date.now() }]);
     }
@@ -56,10 +78,13 @@ const UpdateGame = observer( ({show,onHide}) => {
     const removeDetail = (number) => {
         setDetails(details.filter(i => i.number !== number));
     }
+    const changeDetail = (key,value,number)=>{
+        setDetails(details.map(i=> i.number===number?{...i, [key]:value}:i))
+    }
     return (
         <Modal
             show={show}
-            onHide={onHide}
+            onHide={handleClose}
             centered
         >
             <Modal.Header closeButton>
@@ -77,65 +102,67 @@ const UpdateGame = observer( ({show,onHide}) => {
                             value: gen.id,
                             label: gen.name,
                         }))}
-                        onChange={(value)=> game.setSelectedGame(value.value)}//передаем id
+                        onChange={(value) => setSelectedGame(value.value)}//передаем id
                         controlShouldRenderValue={true}
                         isOptionDisabled={(option) => option.isdisabled}
                     />
-                    <Button 
-                        className={"mt-2"} 
-                        size="sm"
-                        onClick={()=>loadData(game.selectedGame)}
-                    >Изменить</Button>
                     <hr></hr>
+                    <label className={"fs-6 fst-italic mt-2"}>Название</label>
                     <Form.Control
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className={"mt-2"}
-                        placeholder = {"Название игры..."}
+
+                        placeholder={"Название игры..."}
                     />
+                    <label className={"fs-6 fst-italic mt-2"}>Возрастное ограничение</label>
                     <Form.Control
                         value={ageLimit}
                         onChange={(e) => setAgeLimit(e.target.value)}
-                        className={"mt-2"}
-                        placeholder = {"Возрастное ограничение..."}
+                        placeholder={"Возрастное ограничение..."}
                     />
+                    <label className={"fs-6 fst-italic mt-2"}>Количество игроков</label>
                     <Form.Control
                         value={playerCount}
                         onChange={(e) => setPlayerCount(e.target.value)}
-                        className={"mt-2"}
-                        placeholder = {"Количество игроков..."}
+                        placeholder={"Количество игроков..."}
                     />
+                    <label className={"fs-6 fst-italic mt-2"}>Изображение</label>
                     <Form.Control
-                        className={"mt-2"}
                         type={"file"}
-                        placeholder = {"Картинка..."}
+                        placeholder={"Картинка..."}
                         onChange={selectFile}
                     />
                     <Dropdown className={"mt-2"}>
-                        <Dropdown.Toggle> {game.selectedGameGenre.name||"Жанр"}</Dropdown.Toggle>
+                        <Dropdown.Toggle> {Object.keys(selectedGenre).length ===0 ? "Жанр":selectedGenre.name }</Dropdown.Toggle>
                         <Dropdown.Menu>
-                            {genre.genres.map(genre=>
-                                <Dropdown.Item key={genre.id} onClick={()=>game.setSelectedGameGenre(genre)}>{genre.name}</Dropdown.Item>
+                            {genre.genres.map(genre =>
+                                <Dropdown.Item key={genre.id}
+                                               onClick={() => setSelectedGenre(genre)}>{genre.name}</Dropdown.Item>
                             )}
                         </Dropdown.Menu>
                     </Dropdown>
-                    <Button variant={"outline-dark"} className={"mt-2"} onClick={addDetail}>Добавить новую характеристику</Button>
+                    <Button variant={"outline-dark"} className={"mt-2"} onClick={addDetail}>Добавить новую
+                        характеристику</Button>
                     {
-                        details.map(i=>
+                        details.map(i =>
                             <Row className={"mt-2"} key={i.number}>
                                 <Col md={4}>
                                     <Form.Control
+                                        value={i.title}
                                         placeholder={"Название характиристики"}
-                                    />
+                                        onChange={(e)=>changeDetail('title',e.target.value, i.number)}>
+                                    </Form.Control>
                                 </Col>
                                 <Col md={4}>
                                     <Form.Control
+                                        value={i.description}
+                                        onChange={(e)=>changeDetail('description',e.target.value, i.number)}
                                         placeholder={"Описание характеристики"}>
-
                                     </Form.Control>
                                 </Col>
                                 <Col>
-                                    <Button variant={"outline-dark"} onClick={()=> removeDetail(i.number)}>Удалить</Button>
+                                    <Button variant={"outline-dark"}
+                                            onClick={() => removeDetail(i.number)}>Удалить</Button>
                                 </Col>
                             </Row>)
                     }
@@ -143,7 +170,7 @@ const UpdateGame = observer( ({show,onHide}) => {
 
             </Modal.Body>
             <Modal.Footer>
-                <Button variant={"dark"} onClick={onHide}>Закрыть</Button>
+            <Button variant={"dark"} onClick={handleClose}>Закрыть</Button>
                 <Button variant={"dark"} onClick={updateData}>Изменить</Button>
             </Modal.Footer>
         </Modal>

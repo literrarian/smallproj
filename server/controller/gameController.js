@@ -73,6 +73,8 @@ class GameController{
         try{
             const game = req.body
             const {img} = req.files
+            console.log(req.files)
+            let recievedDetails = JSON.parse(game.detail)
             let fileName =uuid.v4() + ".jpg"
             img.mv(path.resolve(__dirname,'..','static',fileName))
             const {id} = req.params
@@ -89,20 +91,95 @@ class GameController{
                 players_num:game.players_num,
                 img: fileName
             })
-            const oldDetail = await  GameDetail.findOne(
-                {
+            
+            if(recievedDetails) {
+                GameDetail.findAll({
                     where: {gameId: id}
-                }
-            )
-            if (oldDetail){
-                oldDetail = JSON.parse(oldDetail) //на фронт передадим эту штуку строкой, на беке она жаба объект
-                oldDetail.forEach(i=>
-                    GameDetail.update({
-                        title: i.title,
-                        descent: i.description,
-                    }))
-                GameDetail.save()
+                })
+                    .then(existingDetails => {
+                        const existingDetailsCount = existingDetails.length;
+                        const receivedDetailsCount = recievedDetails.length;
+
+                        if (existingDetailsCount === receivedDetailsCount) {
+                            // Update existing details
+                            console.log('1')
+                            Promise.all(existingDetails.map((detail, index) => {
+                                detail.update({
+                                    title: recievedDetails[index].title,
+                                    description: recievedDetails[index].description
+                                });
+                            }))
+                                .then(updatedDetails => {
+                                    console.log('Existing details updated:', updatedDetails);
+                                })
+
+                        } else if (existingDetailsCount > receivedDetailsCount) {
+                            // Delete excess details
+                            console.log('2')
+                            const existingDetailIds = existingDetails.map(detail => detail.id);
+                            const recievedDetailIds = recievedDetails.map(detail => detail.id);
+
+                            const excessDetailIds = existingDetailIds.filter(id => !recievedDetailIds.includes(id)); //добавить id если он не в полученных новых данных
+                            GameDetail.destroy({
+                                where: {id: excessDetailIds}
+                            })
+                                .then(numDeleted => {
+                                    console.log(`${numDeleted} excess details deleted`);
+                                    const promises = [];
+                                    existingDetails.forEach(detail => {
+                                        if (recievedDetailIds.includes(detail.id)) {
+                                            const receivedDetail = receivedDetails.find(receivedDetail => receivedDetail.id === detail.id);
+                                            promises.push(detail.update({
+                                                title: receivedDetail.title,
+                                                description: receivedDetail.description
+                                            }));
+                                        }
+                                    });
+
+                                })
+                        } else {
+                            // Add new details and update existing details
+                            console.log('3')
+                            const promises = [];
+
+                            Object.entries(recievedDetails).forEach(([key, value], index) => {
+                                if (existingDetails[index]) {
+                                    // Update existing detail
+                                    promises.push(existingDetails[index].update({[key]: value}));
+                                } else {
+                                    // Create new detail
+                                    const newDetail = {
+                                        gameId, 
+                                        title: value.title,
+                                        description: value.description
+                                    };
+                                    promises.push(GameDetail.create(newDetail));
+                                }
+                            });
+
+                            Promise.all(promises)
+                                .then(results => {
+                                    console.log('Details updated/added:', results);
+                                })
+                               
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error retrieving existing details:', err);
+                        res.status(500).json({message: 'Internal server error'});
+                    });
             }
+            // if (game.detail) {
+            //     if (oldDetail) {
+            //         oldDetail = JSON.parse(oldDetail) //на фронт передадим эту штуку строкой, на беке она жаба объект
+            //         oldDetail.forEach(i =>
+            //             GameDetail.update({
+            //                 title: i.title,
+            //                 descent: i.description,
+            //             }))
+            //         GameDetail.save()
+            //     }
+            // }
             let gameId=id
             let genre_id=game.genre_id
                 await GameGenre.update(
