@@ -4,6 +4,7 @@ const meetingController = require('../controller/meetingController')
 const meetingAlteringRestriction = require('../middleware/meetingAlteringRestrictionMiddleware')
 
 router.post('/',meetingController.create)
+router.post('/sign2M',meetingController.signUserOnMeeting)
 router.get('/',meetingController.getAll)
 router.get('/:id',meetingController.getOne)
 router.put('/:id',meetingAlteringRestriction,meetingController.update)

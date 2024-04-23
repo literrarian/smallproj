@@ -66,6 +66,9 @@ Game.belongsToMany(Genre, {through: GameGenre})
 User.belongsToMany(Meeting, {through: MeetingPlayer})
 Meeting.belongsToMany(User, {through: MeetingPlayer})
 
+MeetingPlayer.belongsTo(Meeting);
+Meeting.hasMany(MeetingPlayer);
+
 
 
 module.exports = {

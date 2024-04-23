@@ -8,8 +8,13 @@ export const fetchGenres = async () =>{
     const {data} = await $host.get('api/genre')
     return data
 }
-export const updateGenre = async (id) =>{
-    const {data} = await $authHost.put('api/genre/'+id)
+export const fetchOneGenre = async (id) =>{
+    const {data} = await $authHost.get('api/genre/'+id)
+    return data
+
+}
+export const updateGenre = async (id,genre) =>{
+    const {data} = await $authHost.put('api/genre/'+id,genre)
     return data
 
 }

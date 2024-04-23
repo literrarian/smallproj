@@ -7,15 +7,29 @@ class MeetingController{
 
     async create(req,res,next){
         try {
+            console.log('wtf')
             let {name, description, game_id, age_restriction, slots_num, m_date,userId} = req.body
             const {img} = req.files
             let fileName =uuid.v4() + ".jpg"
             img.mv(path.resolve(__dirname,'..','static',fileName))
-            const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date,img: filename})
+            const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date,img: fileName})
             let meetingId = meeting.id
             const shoveInJointTable = await MeetingPlayer.create({userId,meetingId})
           //  console.log(shoveInJointTable)
             return res.json(meeting)
+        }
+        catch (e) {
+            next(ApiError.badRequest(e.message))
+        }
+    }
+    async signUserOnMeeting(req,res,next){
+        try {
+            const {userId,meetingId} = req.body
+            console.log(userId)
+            console.log(meetingId)
+            const meeting_player = await MeetingPlayer.create({userId, meetingId})
+           
+            return res.json(meeting_player)
         }
         catch (e) {
             next(ApiError.badRequest(e.message))
@@ -105,7 +119,7 @@ class MeetingController{
     }
     async remove(req,res,next){
         try {
-            const { id } = req.params;
+            const {id} = req.params;
             const numDeleted = await Meeting.destroy({
                 where: { id: id }
             });
@@ -122,7 +136,7 @@ class MeetingController{
         }
         
     }
-    //теперь работает ремув и апдейт
+    
 }
 
 module.exports = new MeetingController()

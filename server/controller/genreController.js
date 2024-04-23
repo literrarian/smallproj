@@ -11,9 +11,20 @@ class GenreController{
         const genres = await Genre.findAll()
         return res.json(genres)
     }
+    async getOne(req,res){
+        const {id} = req.params
+        const genre = await  Genre.findOne(
+            {
+                where: {id}
+                
+            }
+        )
+        return res.json(genre)
+    }
     async update(req,res,next){
         try{
             const genre = req.body
+            console.log("это жанр нейм" + genre.name)
             const {id} = req.params
             if (!id){
                 next(ApiError.badRequest('Такого жанра не существует'))
@@ -26,10 +37,9 @@ class GenreController{
                 name: genre.name,
                 description: genre.description
             })
-
+            console.log(genre)
+            oldGenre.save()
             res.status(200).json({message: "Данные обновлены"})
-            await oldMeeting.save();
-
         }
         catch (e) {
             next(ApiError.badRequest(e.message))

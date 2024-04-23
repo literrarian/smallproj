@@ -1,27 +1,90 @@
 ﻿import React, {useContext, useEffect, useState} from 'react';
-import {Button, Col, Container, Image, Row} from "react-bootstrap";
+import {Button, Col, Container, Image, Row, Spinner} from "react-bootstrap";
 import {Context} from '../index'
 import {useNavigate, useParams} from "react-router-dom";
 import {LOGIN_ROUTE} from '../utils/consts'
 import {fetchOneMeeting} from '../http/MeetingAPI'
-const MeetingPage = () => {
+import {fetchOneUserName} from '../http/UserAPI'
+import {signUserOnMeeting} from '../http/MeetingAPI'
+import {observer} from "mobx-react-lite";
+
+
+const MeetingPage = observer(() => {
     const [meeting,setMeeting] = useState({})
-    const {id} = useParams()
-    useEffect(()=>{
-        fetchOneMeeting(id).then(data => setMeeting(data)) //при создании встречи сразу пушить создателя в player_meeting
-    },[])
+    const [meetingPlayers,setMeetingPlayers] = useState(null)
+    const [loading,setLoading] = useState(true)
+    const [names,setNames] = useState([])
     const {user} = useContext(Context)
     const navigate = useNavigate();
+    const {id} = useParams()
+    
+    useEffect(()=>{
+        fetchOneMeeting(id).then(data => {
+            setMeeting(data)
+            setMeetingPlayers(data.meeting_players)
+        }).finally(() => {
+            setLoading(false)
+            if(!loading){
+            getPlayerNames()}
+        })
+    },[loading])
+    
+    const idToName = async (id) =>{
+        try {
+            const userData = await fetchOneUserName(id);
+            return userData
+        }
+        catch (e) {
+            console.log(e)
+        }
+    }
+    const getPlayerNames = async () => {
+         {
+            try {
+                const playerNames = [];
+                for (const player of meetingPlayers) {
+                    const playerName = await idToName(player.userId);
+                    playerNames.push(playerName);
+                }
+                setNames(playerNames);
+            } catch (error) {
+                console.error(error);
+                setNames([]);
+            }
+        }
+    };
+    
+    const validateSigning = ()=>{
+       let userId = user.user.id
+        let meetingId = id
+         if (meetingPlayers.some(e=> e.userId === userId)) {
+             alert('Вы уже записаны на эту встречу')
+         }
+        else
+        {
+            const formData = new FormData()
+            formData.append('userId',userId)
+            formData.append('meetingId',meetingId)
+            const newEntry = signUserOnMeeting(formData)
+            meetingPlayers.push(newEntry)
+            
+        }
+    } 
+    
+
     return (
         <Container className={"mt-4"}>
+            {loading?
+                <Spinner animation={"grow"}/>
+                :
            <Row>
             <Col md={4}>
-                <Image width={400} height={400} src={process.env.REACT_APP_API_URL+meeting.img}/>
+                <Image width={350} height={350} src={process.env.REACT_APP_API_URL+meeting.img}/>
             </Col>
                 <Col md={4} className={"d-flex flex-column align-items-center"}>
                     <Row>
                         <h2>{meeting.name}</h2>
-                        <div className={"d-flex flex-column mt-4"}>
+                        <div className={"d-flex flex-column mt-4 ps-4"}>
                             
                             <Row>Название: {meeting.name}</Row>   
                             <Row>Возрастное ограничение: {meeting.age_restriction}</Row>   
@@ -31,7 +94,7 @@ const MeetingPage = () => {
                             <Row>Игра: {meeting.game_id}</Row>   
                             <Row>Описание: {meeting.description}</Row>
                             {user.isAuth?
-                            <Button variant={"dark"}>
+                            <Button variant={"dark"} onClick={()=>validateSigning()}>
                                 Записаться
                             </Button> 
                                 :
@@ -40,9 +103,20 @@ const MeetingPage = () => {
                         </div>
                     </Row>
                 </Col>
+               <Col md={2}>
+                   <h4>Уже записаны:</h4>
+                   <div className={"d-flex flex-column mt-4"}>
+                       {names.map((name,index) =>
+                           <Row key={index} 
+                                style={{background: index % 2 === 0 ? 'lightgray' : 'transparent'}}>
+                               {name}
+                           </Row>)}
+                   </div>
+               </Col>
            </Row>
+            }
         </Container>
     );
-};
+})
 
 export default MeetingPage;

@@ -26,7 +26,9 @@ const Auth = observer(() => {
            {
                data = await registration(email,password,nickname,age)
            }
-           user.setUser(user)
+          
+         
+           user.setUser(data)
            user.setIsAuth(true) 
            navigate(GAME_CAT_ROUTE)
        } catch (e) {

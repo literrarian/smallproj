@@ -101,7 +101,7 @@ class GameController{
                         const receivedDetailsCount = recievedDetails.length;
 
                         if (existingDetailsCount === receivedDetailsCount) {
-                            // Update existing details
+                           
                             console.log('1')
                             Promise.all(existingDetails.map((detail, index) => {
                                 detail.update({
@@ -114,7 +114,7 @@ class GameController{
                                 })
 
                         } else if (existingDetailsCount > receivedDetailsCount) {
-                            // Delete excess details
+                           
                             console.log('2')
                             const existingDetailIds = existingDetails.map(detail => detail.id);
                             const recievedDetailIds = recievedDetails.map(detail => detail.id);
@@ -138,16 +138,16 @@ class GameController{
 
                                 })
                         } else {
-                            // Add new details and update existing details
+                            
                             console.log('3')
                             const promises = [];
 
                             Object.entries(recievedDetails).forEach(([key, value], index) => {
                                 if (existingDetails[index]) {
-                                    // Update existing detail
+                                    
                                     promises.push(existingDetails[index].update({[key]: value}));
                                 } else {
-                                    // Create new detail
+                                    
                                     const newDetail = {
                                         gameId, 
                                         title: value.title,

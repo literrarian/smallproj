@@ -7,7 +7,7 @@ import {GENRE_ROUTE} from  '../utils/consts'
 
 const GenreList = observer(() => {
     const {genre} = useContext(Context)
-    
+    console.log(genre.genres)
     return (
 
         <Table striped bordered hover>

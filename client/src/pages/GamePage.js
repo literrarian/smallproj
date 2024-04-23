@@ -1,16 +1,21 @@
 ﻿import React, {useEffect, useState} from 'react';
-import {Col, Container, Image, Row} from "react-bootstrap";
+import {Col, Container, Image, Row, Spinner} from "react-bootstrap";
 import {useParams} from 'react-router-dom' 
 import {fetchOneGame} from '../http/GameAPI'
 const GamePage = () => {
     const [game,setGame] = useState({detail:[]})
+    const [loading,setLoading] = useState(true)
     const {id} = useParams()
     useEffect(()=>{
        fetchOneGame(id).then(data => setGame(data))
+           .finally(() => setLoading(false))
     },[])
     
     return (
         <Container className={"mt-4"}>
+            {loading?
+                <Spinner animation={"grow"}/>
+            :
             <Row>
                 <Col md={6}>
                     <Image width={400} height={400} src={process.env.REACT_APP_API_URL + game.img}/>
@@ -34,6 +39,7 @@ const GamePage = () => {
                     </Row>
                 </Col>
             </Row>
+            }
         </Container>
     );
 };
