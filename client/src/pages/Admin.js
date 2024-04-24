@@ -5,6 +5,7 @@ import CreateGame from '../components/modals/CreateGame'
 import UpdateGame from '../components/modals/UpdateGame'
 import DeleteGame from '../components/modals/DeleteGame'
 import UpdateGenre from '../components/modals/UpdateGenre'
+import Statistics from "../components/Statistics"
 const Admin = () => {
     const [gameVisible,setGameVisible] = useState(false)
     const [genreVisible,setGenreVisible] = useState(false)
@@ -24,10 +25,9 @@ const Admin = () => {
                     <h4 className={"mt-2"}>Удалить</h4>
                     <Button variant={"dark"} className={"mt-2"} onClick={() => setGameDelVisible(true)}>Удалить игру</Button>
                 </Col>
-                <Col md={10} className={"text-center"}>
+                <Col md={8} className={"text-center"}>
                     <h2>Статистика</h2>
-                    графики графики графики
-                    какой-то экспорт
+                  <Statistics/>
                 </Col>
             </Row>
             <CreateGame show={gameVisible} onHide={() => setGameVisible(false)}/>

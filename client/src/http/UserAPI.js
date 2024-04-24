@@ -20,4 +20,8 @@ export const fetchOneUserName = async (id) =>{
     const {data} = await $host.get('api/user/'+id)
     return data.nickname
 }
+export const getCountRegDates = async () =>{
+    const {data} = await $authHost.get('api/user')
+    return data
+}
     

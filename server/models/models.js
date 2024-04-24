@@ -66,6 +66,9 @@ Game.belongsToMany(Genre, {through: GameGenre})
 User.belongsToMany(Meeting, {through: MeetingPlayer})
 Meeting.belongsToMany(User, {through: MeetingPlayer})
 
+Meeting.belongsTo(Game, {foreignKey: 'game_id'});
+Game.hasMany(Meeting, {foreignKey: 'game_id'});
+
 MeetingPlayer.belongsTo(Meeting);
 Meeting.hasMany(MeetingPlayer);
 

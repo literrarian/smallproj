@@ -17,17 +17,28 @@ const MeetingPage = observer(() => {
     const {user} = useContext(Context)
     const navigate = useNavigate();
     const {id} = useParams()
-    
-    useEffect(()=>{
-        fetchOneMeeting(id).then(data => {
-            setMeeting(data)
-            setMeetingPlayers(data.meeting_players)
-        }).finally(() => {
-            setLoading(false)
-            if(!loading){
-            getPlayerNames()}
-        })
-    },[loading])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await fetchOneMeeting(id);
+                setMeeting(data);
+                setMeetingPlayers(data.meeting_players);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [id]);
+
+    useEffect(() => {
+        if (meetingPlayers) {
+            getPlayerNames();
+        }
+    }, [meetingPlayers]);
     
     const idToName = async (id) =>{
         try {
@@ -67,7 +78,8 @@ const MeetingPage = observer(() => {
             formData.append('meetingId',meetingId)
             const newEntry = signUserOnMeeting(formData)
             meetingPlayers.push(newEntry)
-            
+            const updatedNames = [...names, user.user.nickname]
+            setNames(updatedNames)
         }
     } 
     

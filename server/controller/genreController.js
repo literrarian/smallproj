@@ -1,5 +1,6 @@
-﻿const {Genre} = require('../models/models')
+﻿const {Genre,Game} = require('../models/models')
 const ApiError = require('../error/ApiError')
+const {Sequelize} = require('sequelize')
 class GenreController{
 
     async create(req,res){
@@ -11,12 +12,28 @@ class GenreController{
         const genres = await Genre.findAll()
         return res.json(genres)
     }
+    async getGenreCount(req,res){
+        const genres = await Genre.findAll({
+            attributes: [
+                'id',
+                'name',
+                [Sequelize.fn('COUNT', Sequelize.col('games.id')), 'gameCount']
+            ],
+            include: [{
+                model: Game,
+                attributes: [],
+                through: { attributes: [] } 
+            }],
+            group: ['genre.id', 'genre.name'], 
+            raw: true
+        })
+        return res.json(genres)
+    }
     async getOne(req,res){
         const {id} = req.params
         const genre = await  Genre.findOne(
             {
                 where: {id}
-                
             }
         )
         return res.json(genre)

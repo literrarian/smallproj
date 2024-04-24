@@ -11,7 +11,7 @@ const MeetingCataloguePage = observer(()=>{
     const {meeting} = useContext(Context)
     useEffect(()=>{
         fetchMeetings().then(data => meeting.setMeetings(data.rows))
-    },[])
+    },[meeting])
     return (
         <Container fluid>
             <Row className={"mt-5"}>

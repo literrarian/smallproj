@@ -25,7 +25,6 @@ const GamePage = () => {
                         <h2>{game.name}</h2>
                         <Row className={"p-2"}>Возрастное ограничение: {game.age_restriction}</Row>
                         <Row className={"p-2"}>Количество игроков: {game.players_num}</Row>
-                        {console.log(game)}
                         <Row className={"p-2"}>Жанр: {game.genres? game.genres[0].name : ''}</Row>
                        
                         

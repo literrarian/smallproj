@@ -4,7 +4,6 @@ export const createMeeting = async (meeting) =>{
     const {data} = await $authHost.post('api/meeting',meeting)
     return data
 }
-
 export const signUserOnMeeting = async (info) =>{
     const {data} = await $authHost.post('api/meeting/sign2M',info)
     return data

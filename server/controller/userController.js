@@ -1,11 +1,12 @@
 ﻿const ApiError = require('../error/ApiError')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const {User,Meeting} = require(('../models/models'))
+const {User,Meeting} = require('../models/models')
+const {Sequelize} = require('sequelize')
 
-const generateJwt = (id,email,role)=>{
+const generateJwt = (id,email,role,nickname)=>{
    return jwt.sign(
-        {id,email,role},
+        {id,email,role,nickname},
         process.env.SECRET_KEY,
         {expiresIn: '24h'}
     )
@@ -23,7 +24,7 @@ class UserController{
         }
         const hashPassword = await bcrypt.hash(password,5)
         const user = await User.create({email,password:hashPassword,role,nickname, age})
-        const token = generateJwt(user.id,user.email,user.role)
+        const token = generateJwt(user.id,user.email,user.role,user.nickname)
         
         return res.json({token})
     }
@@ -38,12 +39,12 @@ class UserController{
         if (!comparePassword){
             return next(ApiError.internal('Неверный пароль'))
         }
-        const token = generateJwt(user.id,user.email,user.role)
+        const token = generateJwt(user.id,user.email,user.role,user.nickname)
         return res.json({token})
     }
     async check(req,res,next){
        
-        const token = generateJwt(req.user.id, req.user.email, req.user.role)
+        const token = generateJwt(req.user.id, req.user.email, req.user.role,req.user.nickname)
         return res.json({token})
     }
     async getOneUser(req,res){
@@ -51,9 +52,20 @@ class UserController{
         const user = await  User.findOne(
             {
                 where: {id}
-                
             }
         )
+        return res.json(user)
+    }
+    async getCountRegDates(req,res){
+        
+        const user = await  User.findAll({
+            attributes: [
+                [Sequelize.fn('date', Sequelize.col('createdAt')), 'date'], 
+                [Sequelize.fn('count', '*'), 'count'] 
+            ],
+            group: [Sequelize.fn('date', Sequelize.col('createdAt'))], 
+            raw: true 
+        })
         return res.json(user)
     }
 }

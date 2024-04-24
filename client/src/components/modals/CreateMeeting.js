@@ -12,6 +12,8 @@ const CreateMeeting=observer( ({show,onHide}) => {
     
     const {game} = useContext(Context)
     const {user} = useContext(Context)
+    const {meeting} = useContext(Context);
+    
     const [name, setName] = useState('');
     const [ageLimit, setAgeLimit] = useState('');
     const [playerCount, setPlayerCount] = useState('');
@@ -20,11 +22,7 @@ const CreateMeeting=observer( ({show,onHide}) => {
     const [date, setDate] = useState('');
     const [fileName, setFileName] = useState(null);
     const [inputType, setInputType] = useState("text");
-  
-
-    // useEffect(()=>{
-    //     fetchGenres().then(data => genre.setGenres(data))
-    // },[])
+    
     const resetForm = () =>{
         setName('');
         setAgeLimit('');
@@ -52,9 +50,17 @@ const CreateMeeting=observer( ({show,onHide}) => {
         formData.append('m_date',date)
         formData.append('img',fileName)
         formData.append('userId',user.user.id)
-       
-        createMeeting(formData).then(data=>handleClose())
+
+        createMeeting(formData)
+            .then(data => {
+                meeting.setMeetings([...meeting.meetings, data]);
+                handleClose();
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }
+    
 
     return (
         <Modal
