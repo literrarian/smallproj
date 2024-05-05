@@ -4,7 +4,6 @@ const sequelize = require('./db.js')
 const models = require('./models/models')
 const cors = require('cors') 
 const fileUpload = require('express-fileupload')
-const morgan = require('morgan')
 const PORT = process.env.PORT || 8080
 const router = require('./routes/baseRouter')
 const errorHandler = require('./middleware/ErrorHandlingMiddleware')
