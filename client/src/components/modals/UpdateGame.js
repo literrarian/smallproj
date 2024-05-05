@@ -6,6 +6,7 @@ import {fetchOneGame} from '../../http/GameAPI';
 import Select from "react-select";
 import {observer} from "mobx-react-lite";
 import {updateGame} from '../../http/GameAPI'
+import {fetchGames} from '../../http/GameAPI'
 
 const UpdateGame = observer( ({show,onHide}) => {
     const {genre} = useContext(Context);
@@ -17,13 +18,13 @@ const UpdateGame = observer( ({show,onHide}) => {
     const [playerCount, setPlayerCount] = useState('');
     const [details, setDetails] = useState([]);
     const [fileName, setFileName] = useState(null);
+    const [formError, setFormError] = useState('');
     const loadData = async (gameId) => {
         try {
             const gameData = await fetchOneGame(gameId);
             setName(gameData.name);
             setAgeLimit(gameData.age_restriction);
             setPlayerCount(gameData.players_num);
-            setFileName(gameData.img)
             setDetails(gameData.detail)
             setSelectedGenre(gameData.genres[0])
 
@@ -38,6 +39,12 @@ const UpdateGame = observer( ({show,onHide}) => {
         }
     }, [selectedGame]);
 
+    useEffect(()=>{
+        fetchGames(null,null,null,null,null).then(data => {
+            game.setGames(data.rows)
+        })
+    },[])
+
     const selectFile = e =>{
         setFileName(e.target.files[0])
     }
@@ -50,13 +57,23 @@ const UpdateGame = observer( ({show,onHide}) => {
          setFileName('')
          setSelectedGame(0)
          setSelectedGenre({})
+         setFormError('')
      }
      const handleClose = () => {
         resetForm();
          onHide();
      }
+    const validateForm = () => {
+        if (!name || !ageLimit || !playerCount || !selectedGenre.id || !fileName) {
+            setFormError('Заполните все поля');
+            return false;
+        }
+        setFormError('');
+        return true;
+    }
     const updateData = async () =>{
-       try{
+        if (!validateForm()) return;
+        try{
            const formData = new FormData()
            formData.append('name',name)
            formData.append('age_restriction',ageLimit)
@@ -166,6 +183,7 @@ const UpdateGame = observer( ({show,onHide}) => {
                                 </Col>
                             </Row>)
                     }
+                    {formError && <p style={{ color: 'red' }}>{formError}</p>}
                 </Form>
 
             </Modal.Body>

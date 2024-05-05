@@ -3,11 +3,26 @@
 export default class GameStore{
     constructor() {
         this._games = []
-        this._selectedAge = {}
+        
+        this._selectedAge = {} //для фильтров
         this._selectedPlayersNum = {}
-        this._selectedGame = {}
         this._selectedGameGenre={}
+        
+        //this._selectedGame = {}
+        
+        this._page = 1
+        this._totalCount = 0
+        this._limit = 3
         makeAutoObservable(this) //при изменении переменных перерендерим компоненты
+    }
+    setPage(page){
+        this._page = page
+    }
+    setTotalCount(count){
+        this._totalCount = count
+    }
+    setLimit(limit){
+        this._limit = limit
     }
     setGames(games){
         this._games = games
@@ -18,9 +33,12 @@ export default class GameStore{
     setSelectedGameGenre(genre){
         this._selectedGameGenre = genre
     }
-    setSelectedGame(game){
-        this._selectedGame = game //может тут нужен массив
-    }
+    // setSelectedGame(game){
+    //     this._selectedGame = game 
+    // }
+    // get selectedGame(){
+    //     return  this._selectedGame 
+    // }
     setSelectedAge(selectedAge){
         this._selectedAge = selectedAge //может тут нужен массив
     }
@@ -33,10 +51,17 @@ export default class GameStore{
     get selectedPlayersNum(){
         return  this._selectedPlayersNum //может тут нужен массив
     }
-    get selectedGame(){
-        return  this._selectedGame //может тут нужен массив
-    }
+    
     get selectedGameGenre(){
         return  this._selectedGameGenre //может тут нужен массив
+    }
+    get totalCount(){
+        return  this._totalCount //может тут нужен массив
+    }
+    get limit(){
+        return  this._limit //может тут нужен массив
+    }
+    get page(){
+        return  this._page //может тут нужен массив
     }
 }

@@ -23,7 +23,7 @@ const FilterPanelMeeting = observer(() => {
     };
         return (
             <Col md={2}>
-                <h6>Возраст</h6>
+                <label className={"fs-6 fst-italic mt-2"}>Возраст</label>
                 <Select
                     placeholder={"Возраст..."}
                     //   isMulti={true}
@@ -33,12 +33,14 @@ const FilterPanelMeeting = observer(() => {
                         value: gen.id,
                         label: gen.age_restriction,
                     }))}
-                    onChange={(value)=> meeting.setSelectedGenre(value.value)} //передаем id
+                    onChange={(value)=> 
+                        value? meeting.setAgeRestriction(value.label) :meeting.setAgeRestriction(null) } //передаем id
                     controlShouldRenderValue={true}
                     isOptionDisabled={(option) => option.isdisabled}
+                    isClearable={true}
                 />
 
-                <h6>Количество слотов</h6>
+                <label className={"fs-6 fst-italic mt-2"}>Слоты</label>
                 <Select
                     placeholder={"Количество..."}
                     //   isMulti={true}
@@ -49,11 +51,13 @@ const FilterPanelMeeting = observer(() => {
                         value: gen.id,
                         label: gen.slots_num,
                     }))}
-                    onChange={(value)=> meeting.setSelectedPlayersNum(value.label)} //не айди
+                    onChange={(value)=> 
+                        value? meeting.setSlotsNum(value.label): meeting.setSlotsNum(null) } //не айди
                     controlShouldRenderValue={true}
                     isOptionDisabled={(option) => option.isdisabled}
+                    isClearable={true}
                 />
-                <h6>Игра</h6>
+                <label className={"fs-6 fst-italic mt-2"}>Игра</label>
                 <Select
                     placeholder={"Игра..."}
                     //    isMulti={true}
@@ -63,9 +67,11 @@ const FilterPanelMeeting = observer(() => {
                         value: gam.id,
                         label: gam.name,
                     }))}
-                    onChange={(value)=> game.setSelectedAge(value.id)}
+                    onChange={(value)=> 
+                        value? meeting.setGameId(value.value):meeting.setGameId(null)}
                     controlShouldRenderValue={true}
                     isOptionDisabled={(option) => option.isdisabled}
+                    isClearable={true}
                 />
                 {user.isAuth?
                     <Button variant={"dark"} className={"mt-4"} onClick={()=> setMeetingVisible(true)}>

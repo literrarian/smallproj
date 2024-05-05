@@ -14,14 +14,22 @@ const generateJwt = (id,email,role,nickname)=>{
 class UserController{
     async registration(req,res,next){
         const {email,password,role,nickname, age} = req.body
-        if(!email||!password){
-            return next(ApiError.badRequest('Некорректный пароль или email'))
+        if(!email||!password||!nickname){
+            return next(ApiError.badRequest('Не все поля заполнены, или заполнены неверно'))
         }
+        
         const sameMailUser = await User.findOne({where:{email}})
         if (sameMailUser)
         {
             return next(ApiError.badRequest('Пользователь с такой почтой уже существует'))
         }
+        
+        const sameNicknameUser = await User.findOne({where:{nickname}})
+        if (sameNicknameUser)
+        {
+            return next(ApiError.badRequest('Пользователь с таким ником уже существует'))
+        }
+        
         const hashPassword = await bcrypt.hash(password,5)
         const user = await User.create({email,password:hashPassword,role,nickname, age})
         const token = generateJwt(user.id,user.email,user.role,user.nickname)

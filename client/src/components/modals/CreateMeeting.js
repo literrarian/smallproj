@@ -7,6 +7,9 @@ import {createMeeting} from '../../http/MeetingAPI'
 import {Context} from '../../index'
 import {observer} from "mobx-react-lite";
 import Select from "react-select";
+import {fetchGames} from '../../http/GameAPI'
+import {jwtDecode} from "jwt-decode"
+
 
 const CreateMeeting=observer( ({show,onHide}) => {
     
@@ -22,6 +25,14 @@ const CreateMeeting=observer( ({show,onHide}) => {
     const [date, setDate] = useState('');
     const [fileName, setFileName] = useState(null);
     const [inputType, setInputType] = useState("text");
+
+    const [formError, setFormError] = useState('');
+
+    useEffect(()=>{
+        fetchGames(null,null,null,null,null).then(data => {
+            game.setGames(data.rows)
+        })
+    },[])
     
     const resetForm = () =>{
         setName('');
@@ -30,6 +41,7 @@ const CreateMeeting=observer( ({show,onHide}) => {
         setFileName('')
         setSelectedGame(0)
         setDescription('')
+        setFormError('')
         
     }
     const handleClose = () => {
@@ -39,8 +51,17 @@ const CreateMeeting=observer( ({show,onHide}) => {
     const selectFile = e =>{
         setFileName(e.target.files[0])
     }
-    
+    const validateForm = () => {
+        if (!name || !ageLimit || !playerCount || !selectedGame || !description || !date || !fileName) {
+            setFormError('Заполните все поля');
+            return false;
+        }
+        setFormError('');
+        return true;
+    }
     const addMeeting = ()=>{
+        if (!validateForm()) return;
+        const userId = jwtDecode(localStorage.getItem('token'))
         const formData = new FormData()
         formData.append('name',name)
         formData.append('description',description)
@@ -49,7 +70,8 @@ const CreateMeeting=observer( ({show,onHide}) => {
         formData.append('slots_num',playerCount)
         formData.append('m_date',date)
         formData.append('img',fileName)
-        formData.append('userId',user.user.id)
+        formData.append('userId',userId.id)
+        console.log(userId.id)
 
         createMeeting(formData)
             .then(data => {
@@ -127,6 +149,7 @@ const CreateMeeting=observer( ({show,onHide}) => {
                         placeholder = {"Картинка..."}
                         onChange={selectFile}
                     />
+                    {formError && <p style={{ color: 'red' }}>{formError}</p>}
                 </Form>
 
             </Modal.Body>

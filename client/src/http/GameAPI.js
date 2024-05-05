@@ -4,8 +4,10 @@ export const createGame = async (game) =>{
     const {data} = await $authHost.post('api/game',game)
     return data
 }
-export const fetchGames = async () =>{
-    const {data} = await $host.get('api/game')
+export const fetchGames = async (genreId,players_num,age_restriction,limit,page) =>{
+    const {data} = await $host.get('api/game',{params:{
+            genreId,players_num,age_restriction,limit,page
+        }})
     return data
 }
 export const fetchOneGame = async (id) =>{

@@ -1,4 +1,4 @@
-﻿const {Meeting, MeetingPlayer} = require('../models/models')
+﻿const {Meeting, MeetingPlayer,Game} = require('../models/models')
 const ApiError = require('../error/ApiError')
 const {Op} = require("sequelize");
 const uuid = require('uuid')
@@ -8,16 +8,27 @@ class MeetingController{
 
     async create(req,res,next){
         try {
-            console.log('wtf')
+           
             let {name, description, game_id, age_restriction, slots_num, m_date,userId} = req.body
+            console.log(userId)
             const {img} = req.files
             let fileName =uuid.v4() + ".jpg"
             img.mv(path.resolve(__dirname,'..','static',fileName))
+            
             const meeting = await Meeting.create({name, description,game_id, age_restriction, slots_num, m_date,img: fileName})
+
+            const newMeeting = await Meeting.findOne(
+                {
+                    where: {id: {[Op.eq]:meeting.id}},
+                    include: [
+                        {model:Game, as:'game'}
+                    ]
+                }
+            )
             let meetingId = meeting.id
             const shoveInJointTable = await MeetingPlayer.create({userId,meetingId})
           //  console.log(shoveInJointTable)
-            return res.json(meeting)
+            return res.json(newMeeting)
         }
         catch (e) {
             next(ApiError.badRequest(e.message))
@@ -26,8 +37,6 @@ class MeetingController{
     async signUserOnMeeting(req,res,next){
         try {
             const {userId,meetingId} = req.body
-            console.log(userId)
-            console.log(meetingId)
             const meeting_player = await MeetingPlayer.create({userId, meetingId})
            
             return res.json(meeting_player)
@@ -37,42 +46,44 @@ class MeetingController{
         }
     }
     async getAll(req,res){
-        let {game_id,slots_num,user_id,limit,page} = req.query
+        let {game_id,slots_num,age_restriction,limit,page} = req.query
         page = page || 1
         limit = limit || 10
         let offset = page*limit - limit
         let meetings;
+        console.log(game_id)
 
-        if(!game_id && !slots_num && !user_id){
-            meetings = await Meeting.findAndCountAll({limit, offset})
+        if(!game_id && !slots_num && !age_restriction){
+            meetings = await Meeting.findAndCountAll({include: [Game], limit, offset})
             return res.json(meetings)
         }
-        if(game_id && !slots_num && !user_id){
-            meetings = await Meeting.findAndCountAll({where: {gameid}, limit, offset})
+        if(game_id && !slots_num && !age_restriction){
+            meetings = await Meeting.findAndCountAll({limit, offset, include: {model: Game, where:{id: {[Op.eq]:game_id}} }
+            })
             return res.json(meetings)
         }
-        if(!game_id && slots_num && !user_id){
-            meetings = await Meeting.findAndCountAll({where: {slots_num}, limit, offset})
+        if(!game_id && slots_num && !age_restriction){
+            meetings = await Meeting.findAndCountAll({where:{slots_num},include: [Game], limit, offset})
             return res.json(meetings)
         }
-        if(!game_id && !slots_num && user_id){
-            meetings = await Meeting.findAndCountAll({where: {user_id}, limit, offset})
+        if(!game_id && !slots_num && age_restriction){
+            meetings = await Meeting.findAndCountAll({where:{age_restriction},include: [Game], limit, offset})
             return res.json(meetings)
         }
-        if(game_id && slots_num && !user_id){
-            meetings = await Meeting.findAndCountAll({where: {game_id, slots_num}, limit, offset})
+        if(game_id && slots_num && !age_restriction){
+            meetings = await Meeting.findAndCountAll({limit, offset, where: {game_id, slots_num}, include: {model: Game, where:{id: {[Op.eq]:game_id}}}})
             return res.json(meetings)
         }
-        if(game_id && !slots_num && user_id){
-            meetings = await Meeting.findAndCountAll({where: {game_id, user_id}, limit, offset})
+        if(game_id && !slots_num && age_restriction){
+            meetings = await Meeting.findAndCountAll({limit, offset, where: {game_id, age_restriction}, include: {model: Game, where:{id: {[Op.eq]:game_id}}}})
             return res.json(meetings)
         }
-        if(!game_id && slots_num && user_id){
-            meetings = await Meeting.findAndCountAll({where: {slots_num, user_id}, limit, offset})
+        if(!game_id && slots_num && age_restriction){
+            meetings = await Meeting.findAndCountAll({where: {slots_num, age_restriction},include: [Game], limit, offset})
             return res.json(meetings)
         }
-        if(game_id && slots_num && user_id){
-            meetings = await Meeting.findAndCountAll({where: {game_id, slots_num, user_id}, limit, offset})
+        if(game_id && slots_num && age_restriction){
+            meetings = await Meeting.findAndCountAll({limit, offset, where: {game_id, slots_num,age_restriction}, include: {model: Game, where:{id: {[Op.eq]:game_id}}}})
             return res.json(meetings)
         }
         
@@ -83,7 +94,8 @@ class MeetingController{
             {
                 where: {id},
                 include: [
-                    {model:MeetingPlayer}
+                    {model:MeetingPlayer},
+                    {model:Game, as:'game'}
                 ] 
             }
         )

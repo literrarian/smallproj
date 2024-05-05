@@ -6,10 +6,12 @@ import {LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Bar
 import {getCountRegDates} from'../http/UserAPI'
 import {getGenreCount} from'../http/GenreAPI'
 
+const ExcelJS = require('exceljs');
 
 const Statistics = observer(() => {
     const [userData, setUserData] = useState([]);
     const [genreData,setGenreData] = useState([])
+    let essGenreData={};
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -36,10 +38,42 @@ const Statistics = observer(() => {
         }, [{ id: '0', name: 'Не использован в игре', gameCount: 0 }]);
         return groupedData;
     };
-  
-    const exportToExcel = () =>{
-        console.log(userData)
-    }   
+
+    const exportToExcel = () => {
+        const workbook = new ExcelJS.Workbook();
+        const sheetRegs = workbook.addWorksheet('Регистрации');
+        const sheetGenres = workbook.addWorksheet('Жанры');
+        let headersUsers = Object.keys(userData[0]);
+        let headersGenres = ['name','gameCount'];
+       
+        sheetRegs.addRow(headersUsers);
+        sheetGenres.addRow(headersGenres);
+        userData.forEach(row=>{
+            let values = headersUsers.map(header => row[header]);
+            sheetRegs.addRow(values)
+        })
+
+        genreData.forEach(row=>{
+            let values = headersGenres.map(header => row[header]);
+            sheetGenres.addRow(values)
+        })
+
+        workbook.xlsx.writeBuffer()
+            .then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); //binary large obj
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'Статистика.xlsx';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                console.error('Ошибка:', err);
+            });
+    }
         return (
             <Container className={"mt-4"}>
               <Row className={"d-flex justify-content-center"}>

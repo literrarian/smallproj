@@ -7,6 +7,7 @@ import {fetchOneMeeting} from '../http/MeetingAPI'
 import {fetchOneUserName} from '../http/UserAPI'
 import {signUserOnMeeting} from '../http/MeetingAPI'
 import {observer} from "mobx-react-lite";
+import {jwtDecode} from "jwt-decode"
 
 
 const MeetingPage = observer(() => {
@@ -14,9 +15,12 @@ const MeetingPage = observer(() => {
     const [meetingPlayers,setMeetingPlayers] = useState(null)
     const [loading,setLoading] = useState(true)
     const [names,setNames] = useState([])
+    const [vacantSlots,setVacantSlots] = useState(0)
     const {user} = useContext(Context)
     const navigate = useNavigate();
     const {id} = useParams()
+    const [buttonDisabled,setButtonDisabled] = useState(false)
+   
 
     useEffect(() => {
         const fetchData = async () => {
@@ -37,9 +41,12 @@ const MeetingPage = observer(() => {
     useEffect(() => {
         if (meetingPlayers) {
             getPlayerNames();
+            setVacantSlots(meeting.slots_num - meetingPlayers.length);
+            
         }
     }, [meetingPlayers]);
     
+   
     const idToName = async (id) =>{
         try {
             const userData = await fetchOneUserName(id);
@@ -66,21 +73,28 @@ const MeetingPage = observer(() => {
     };
     
     const validateSigning = ()=>{
-       let userId = user.user.id
+       let userId = jwtDecode(localStorage.getItem('token'))
+        let userName = userId.nickname
         let meetingId = id
-         if (meetingPlayers.some(e=> e.userId === userId)) {
+       
+         if (names.includes(userName)) {
              alert('Вы уже записаны на эту встречу')
          }
-        else
+        else if (vacantSlots===0)
         {
+            alert('На эту встречу все слоты заняты.')
+        }
+        else{
             const formData = new FormData()
-            formData.append('userId',userId)
+            formData.append('userId',userId.id)
             formData.append('meetingId',meetingId)
             const newEntry = signUserOnMeeting(formData)
             meetingPlayers.push(newEntry)
             const updatedNames = [...names, user.user.nickname]
             setNames(updatedNames)
+             setButtonDisabled(true)
         }
+        
     } 
     
 
@@ -101,12 +115,12 @@ const MeetingPage = observer(() => {
                             <Row>Название: {meeting.name}</Row>   
                             <Row>Возрастное ограничение: {meeting.age_restriction}</Row>   
                             <Row>Слоты: {meeting.slots_num}</Row>
-                            <Row>Свободных слотов: {}</Row>
+                            <Row>Свободных слотов: {vacantSlots}</Row>
                             <Row>Дата: {meeting.m_date}</Row>   
-                            <Row>Игра: {meeting.game_id}</Row>   
+                            <Row>Игра: {meeting.game.name}</Row>   
                             <Row>Описание: {meeting.description}</Row>
                             {user.isAuth?
-                            <Button variant={"dark"} onClick={()=>validateSigning()}>
+                            <Button variant={"dark"} disabled={buttonDisabled}onClick={()=>validateSigning()}>
                                 Записаться
                             </Button> 
                                 :

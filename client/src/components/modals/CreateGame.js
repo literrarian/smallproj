@@ -17,6 +17,8 @@ const CreateGame =observer( ({show,onHide}) => {
     const [gGenre, setGGenre] = useState('');
     const [fileName, setFileName] = useState(null);
 
+    const [formError, setFormError] = useState('');
+
     // useEffect(()=>{
     //     fetchGenres().then(data => genre.setGenres(data))
     // },[])
@@ -26,6 +28,7 @@ const CreateGame =observer( ({show,onHide}) => {
         setPlayerCount('');
         setFileName('')
         game.setSelectedGameGenre('')
+        setFormError('')
     }
     const handleClose = () => {
         resetForm();
@@ -43,7 +46,16 @@ const CreateGame =observer( ({show,onHide}) => {
     const changeDetail = (key,value,number)=>{
         setDetail(detail.map(i=> i.number===number?{...i, [key]:value}:i))
     }
+    const validateForm = () => {
+        if (!name || !ageLimit || !playerCount || !game.selectedGameGenre.id || !fileName) {
+            setFormError('Заполните все поля');
+            return false;
+        }
+        setFormError('');
+        return true;
+    }
     const addGame = ()=>{
+        if (!validateForm()) return;
        const formData = new FormData()
         formData.append('name',name)
         formData.append('age_restriction',ageLimit)
@@ -123,6 +135,7 @@ const CreateGame =observer( ({show,onHide}) => {
                             </Col>
                         </Row>)
                     }
+                    {formError && <p style={{ color: 'red' }}>{formError}</p>}
                 </Form>
                 
             </Modal.Body>

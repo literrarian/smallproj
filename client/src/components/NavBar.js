@@ -12,14 +12,18 @@ import {LOGIN_ROUTE} from '../utils/consts'
 import {Button} from "react-bootstrap";
 import {observer} from "mobx-react-lite"
 import {useNavigate} from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 export const NavBar = observer(() => {
     const {user} = useContext(Context)
     const navigate = useNavigate()
+
+   const role= jwtDecode(localStorage.getItem('token'))
     
     const logOut = () => {
         user.setUser({})
         user.setIsAuth(false)
     }
+    
     
     return (
         <Navbar bg="dark" data-bs-theme="dark">
@@ -29,16 +33,18 @@ export const NavBar = observer(() => {
                     <NavLink style={{color:'white'}} className={"p-1"} to={MEETING_CAT_ROUTE}> Встречи </NavLink>
                     <NavLink style={{color:'white'}} className={"p-1"} to={GENRE_ROUTE}> Жанры </NavLink>
                 </div>
-                {user.isAuth ?
-                    <Nav className="ml-auto" style={{color:'white'}}>
-                        <Button variant={"outline-light"} onClick={()=> navigate(ADMIN_ROUTE)}>Панель администратора</Button>
-                        <Button variant={"outline-light"}className={"ms-2"} onClick={()=> logOut()}>Выйти</Button>
+                {user.isAuth ? (
+                    <Nav className="ml-auto" style={{ color: 'white' }}>
+                        {role.role === 'ADMIN' && (
+                            <Button variant={"outline-light"} onClick={() => navigate(ADMIN_ROUTE)}>Панель администратора</Button>
+                        )}
+                        <Button variant={"outline-light"} className={"ms-2"} onClick={logOut}>Выйти</Button>
                     </Nav>
-                        :
-                    <Nav className="ml-auto" style={{color:'white'}}>
-                        <Button variant={"outline-light"} onClick={()=>navigate(LOGIN_ROUTE)}>Авторизация</Button>
+                ) : (
+                    <Nav className="ml-auto" style={{ color: 'white' }}>
+                        <Button variant={"outline-light"} onClick={() => navigate(LOGIN_ROUTE)}>Авторизация</Button>
                     </Nav>
-                }
+                )}
             </Container>
         </Navbar>
     );

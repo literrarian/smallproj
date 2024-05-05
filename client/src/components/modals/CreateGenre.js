@@ -6,7 +6,27 @@ import {createGenre} from '../../http/GenreAPI'
 const CreateGenre = ({show,onHide}) => {
     const [name,setName] = useState('')
     const [descr,setDescr] = useState('')
+    const [formError, setFormError] = useState('');
+
+    const validateForm = () => {
+        if (!name || !descr) {
+            setFormError('Заполните все поля');
+            return false;
+        }
+        setFormError('');
+        return true;
+    }
+    const resetForm = () =>{
+        setName('');
+        setDescr('');
+        setFormError('')
+    }
+    const handleClose = () => {
+        resetForm();
+        onHide();
+    }
     const addGenre = ()=>{
+        if (!validateForm()) return;
         const formData = new FormData()
         formData.append('name',name)
         formData.append('description',descr)
@@ -42,10 +62,11 @@ const CreateGenre = ({show,onHide}) => {
                         className={"mt-2"}
                         placeholder = {"Описание жанра..."}
                     />
+                    {formError && <p style={{ color: 'red' }}>{formError}</p>}
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant={"dark"} onClick={onHide}>Закрыть</Button>
+                <Button variant={"dark"} onClick={handleClose}>Закрыть</Button>
                 <Button variant={"dark"} onClick={addGenre}>Добавить</Button>
             </Modal.Footer>
         </Modal>

@@ -8,8 +8,10 @@ export const signUserOnMeeting = async (info) =>{
     const {data} = await $authHost.post('api/meeting/sign2M',info)
     return data
 }
-export const fetchMeetings = async () =>{
-    const {data} = await $host.get('api/meeting')
+export const fetchMeetings = async (game_id,slots_num,age_restriction,limit,page) =>{
+    const {data} = await $host.get('api/meeting',{params:{
+            game_id,slots_num,age_restriction,limit,page
+        }})
     return data
 }
 export const fetchOneMeeting = async (id) =>{

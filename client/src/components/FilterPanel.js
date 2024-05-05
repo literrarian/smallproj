@@ -6,9 +6,9 @@ import {observer} from "mobx-react-lite"
 
 
 const FilterPanel = observer(() => {
-    const {genre} = useContext(Context)
-    const {game} = useContext(Context)
-
+        const {genre} = useContext(Context)
+        const {game} = useContext(Context)
+        
         const removeDuplicates = (array, property) => {
             return array.filter((item, index, self) =>
                     index === self.findIndex((t) => (
@@ -16,24 +16,26 @@ const FilterPanel = observer(() => {
                     ))
             );
         };
+
     return (
         <Col md={2}>
-            <h6>Жанры</h6>
+            <label className={"fs-6 fst-italic mt-2"}>Жанр</label>
             <Select
                 placeholder={"Жанр..."}
-             //   isMulti={true}
                 closeMenuOnSelect={true}
                 hideSelectedOptions={false}
                 options={genre.genres.map((gen) => ({
                     value: gen.id,
                     label: gen.name,
                 }))}
-                onChange={(value)=> genre.setSelectedGenre(value.value)} //передаем id
+                onChange={(value)=> 
+                    value? game.setSelectedGameGenre(value.value):game.setSelectedGameGenre(null)} //передаем id
                 controlShouldRenderValue={true}
                 isOptionDisabled={(option) => option.isdisabled}
+                isClearable={true} 
             />
-            
-            <h6>Количество игроков</h6>
+
+            <label className={"fs-6 fst-italic mt-2"}>Количество игроков</label>
             <Select
                 placeholder={"Количество..."}
              //   isMulti={true}
@@ -43,11 +45,13 @@ const FilterPanel = observer(() => {
                     value: gam.id,
                     label: gam.players_num,
                 }))}
-                onChange={(value)=> game.setSelectedPlayersNum(value.label)} //не айди
+                onChange={(value)=> 
+                    value? game.setSelectedPlayersNum(value.label): game.setSelectedPlayersNum(null)} //не айди
                 controlShouldRenderValue={true}
                 isOptionDisabled={(option) => option.isdisabled}
+                isClearable={true} 
             />
-            <h6>Возраст</h6>
+            <label className={"fs-6 fst-italic mt-2"}>Возраст</label>
             <Select
                 placeholder={"Возраст..."}
             //    isMulti={true}
@@ -58,10 +62,13 @@ const FilterPanel = observer(() => {
                     label: gam.age_restriction,
                 }))}
                 
-                onChange={(value)=> game.setSelectedAge(value.label)}
+                onChange={(value)=> 
+                    value? game.setSelectedAge(value.label):game.setSelectedAge(null) }
                 controlShouldRenderValue={true}
                 isOptionDisabled={(option) => option.isdisabled}
+                isClearable={true}
             />
+            
            
         </Col>
     )

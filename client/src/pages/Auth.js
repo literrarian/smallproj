@@ -16,7 +16,30 @@ const Auth = observer(() => {
     const [password,setPassword] = useState('')
     const [nickname,setNickname] = useState('')
     const [age,setAge] = useState('')
+
+    const [emailError, setEmailError] = useState(null);
+    const [passwordError, setPasswordError] = useState(null);
+
+    const validateEmail = () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.(?:com|net|org|ru|co\.uk|info|biz|gov|edu|in|me)$/i;
+        if (!emailRegex.test(email)) {
+            setEmailError("Неверный формат почты");
+            return false;
+        }
+        setEmailError(null);
+        return true;
+    }
+
+    const validatePassword = () => {
+        if (password.length < 6) {
+            setPasswordError("Пароль должен содержать 6+ символов");
+            return false;
+        }
+        setPasswordError(null);
+        return true;
+    }
    const click = async ()=>{
+       
        try{
            let data;
            if(isLogin) {
@@ -24,9 +47,14 @@ const Auth = observer(() => {
            }
            else
            {
-               data = await registration(email,password,nickname,age)
+               if (!validateEmail() || !validatePassword()) {
+                   return;
+               }
+               else{
+                   data = await registration(email,password,nickname,age) 
+               }
+               
            }
-          
          
            user.setUser(data)
            user.setIsAuth(true) 
@@ -66,14 +94,18 @@ const Auth = observer(() => {
                        placeholder="Введите email..."
                        value={email}
                        onChange={e=> setEmail(e.target.value)}
+                       onBlur={validateEmail}
                        />
+                           {emailError && <p style={{ color: 'red' }}>{emailError}</p>}
                        <Form.Control
                            className={"mt-2"}
                            placeholder="Введите пароль..."
                            type={"password"}
                            value={password}
                            onChange={e=> setPassword(e.target.value)}
+                           onBlur={validatePassword}
                        />
+                           {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
                        <Form.Control
                            className={"mt-2"}
                            placeholder="Введите имя..."

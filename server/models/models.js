@@ -18,7 +18,7 @@ const Meeting = sequelize.define('meeting',{
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     name: {type: DataTypes.STRING, unique: true, allowNull:false},
     game_id: {type: DataTypes.INTEGER, allowNull: false},
-    description: {type: DataTypes.STRING, unique: true, allowNull:false},
+    description: {type: DataTypes.STRING, allowNull:false},
     age_restriction: {type:DataTypes.STRING},
     slots_num:{type: DataTypes.INTEGER, allowNull:false},
     m_date: {type: DataTypes.DATE, allowNull:false},

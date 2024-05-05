@@ -16,7 +16,7 @@ const MeetingsList = observer(() => {
             <tr>
                 <th>Название</th>
                 <th>Возрастное ограничение</th>
-                <th>Свободных слотов</th>
+                <th>Слоты</th>
                 <th>Игра</th>
                 <th>Дата</th>
             </tr>
@@ -25,9 +25,10 @@ const MeetingsList = observer(() => {
             {meeting.meetings.map((meetingItem, index) => (
                 <tr key={index} onClick={() => navigate(MEETING_ROUTE + '/' + meetingItem.id)}>
                     <td>{meetingItem.name}</td>
+
                     <td>{meetingItem.age_restriction}</td>
                     <td>{meetingItem.slots_num}</td>
-                    <td>{meetingItem.game_id}</td>
+                    <td>{meetingItem.game.name? meetingItem.game.name:"бябябя"}</td>
                     <td>{meetingItem.m_date}</td>
                 </tr>
             ))}

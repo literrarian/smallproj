@@ -38,20 +38,59 @@ class GameController{
        
     }
     async getAll(req,res){
-        let {genreId,limit,page} = req.query
+        let {genreId,players_num,age_restriction,limit,page} = req.query
         page = page || 1
         limit = limit || 10
         let offset = page*limit - limit
         console.log(genreId)
         let games;
         
-        if(!genreId){
+        if(!genreId && !players_num && !age_restriction ){
             games = await Game.findAndCountAll({include: [Genre], limit, offset})
             return res.json(games)
         }
-        if(genreId){
-            games = await Game.findAndCountAll({include: {model: Genre, where:{id: {[Op.eq]:genreId}}, limit, offset}
+        if(genreId && !players_num && !age_restriction){
+            games = await Game.findAndCountAll({limit, offset, include: {model: Genre, where:{id: {[Op.eq]:genreId}} }
             })
+        }
+        if(genreId && players_num && !age_restriction){
+            games = await Game.findAndCountAll(
+                {limit, offset,
+                    where:{players_num},
+                    include: 
+                        {
+                            model: Genre, 
+                            where:{id: {[Op.eq]:genreId}},
+                        }
+                })
+        }
+        if(genreId && players_num && age_restriction){
+            games = await Game.findAndCountAll(
+                {limit, offset,
+                    where:{players_num,age_restriction},
+                    include:
+                        {
+                            model: Genre,
+                            where:{id: {[Op.eq]:genreId}},
+                        }
+                })
+        }
+        if(genreId && !players_num && age_restriction){
+            games = await Game.findAndCountAll(
+                {limit, offset,
+                    where:{age_restriction},
+                    include:
+                        {model: Genre, where:{id: {[Op.eq]:genreId}} }
+                })
+        }
+        if(!genreId && players_num && !age_restriction){
+            games = await Game.findAndCountAll({where:{players_num},include: [Genre], limit, offset})
+        }
+        if(!genreId && players_num && age_restriction){
+            games = await Game.findAndCountAll({where:{players_num,age_restriction},include: [Genre], limit, offset})
+        }
+        if(!genreId && !players_num && age_restriction){
+            games = await Game.findAndCountAll({where:{age_restriction},include: [Genre], limit, offset})
         }
         return res.json(games)
     }

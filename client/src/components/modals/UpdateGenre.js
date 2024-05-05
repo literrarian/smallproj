@@ -12,6 +12,7 @@ const UpdateGenre= observer( ({show,onHide}) => {
     const [selectedGenre, setSelectedGenre] = useState(0);
     const [name,setName] = useState('')
     const [description, setDescription] = useState('');
+    const [formError, setFormError] = useState('');
 
     const loadData = async (genreId) => {
         try {
@@ -29,18 +30,27 @@ const UpdateGenre= observer( ({show,onHide}) => {
              loadData(selectedGenre);
          }
      }, [selectedGenre]);
-    
 
+    const validateForm = () => {
+        if (!name || !description) {
+            setFormError('Заполните все поля');
+            return false;
+        }
+        setFormError('');
+        return true;
+    }
     const resetForm = () =>{
         setName('');
         setDescription('');
         setSelectedGenre(0)
+        setFormError('')
     }
     const handleClose = () => {
         resetForm();
         onHide();
     }
     const updateData = async () =>{
+        if (!validateForm()) return;
         try{
             const formData = new FormData()
             formData.append('name',name)
@@ -90,6 +100,7 @@ const UpdateGenre= observer( ({show,onHide}) => {
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder={"Описание..."}
                     />
+                    {formError && <p style={{ color: 'red' }}>{formError}</p>}
                 </Form>
 
             </Modal.Body>
