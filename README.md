@@ -5,5 +5,7 @@
 PostgreSQL + express + React js + node.js
 
 Запуск проекта
+
 npm i
+
 npm run dev.
