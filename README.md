@@ -4,4 +4,6 @@
 
 PostgreSQL + express + React js + node.js
 
-Старт сервера и клиента единомоментно - npm run dev.
+Запуск проекта
+npm i
+npm run dev.
